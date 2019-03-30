@@ -159,7 +159,7 @@ GAMMA = 0.999
 EPS_START = 0.9
 EPS_END = 0.05
 EPS_DECAY = 1000
-TARGET_UPDATE = 700
+TARGET_UPDATE = 1000
 
 
 
@@ -333,7 +333,7 @@ for i_episode in range(num_episodes):
         if step_loss!= None:
             epiloss.append(step_loss)
 
-        if t>TARGET_UPDATE and t % TARGET_UPDATE <= 2:
+        if t>TARGET_UPDATE and t % TARGET_UPDATE <= 3:
             print("Target_Net Updated.....")
             target_net.load_state_dict(policy_net.state_dict())
 

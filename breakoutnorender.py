@@ -339,7 +339,8 @@ for i_episode in range(num_episodes):
 
         if done:
             episode_durations.append(epi_reward)
-            plot_durations()
+            print(epi_reward)
+            # plot_durations()
             break
 
     mean_loss = np.mean(epiloss)
