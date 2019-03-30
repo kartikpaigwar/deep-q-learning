@@ -67,7 +67,7 @@ class DQN(nn.Module):
 
     def __init__(self):
         super(DQN, self).__init__()
-        self.n_action = 3
+        self.n_action = 4
 
         self.conv1 = nn.Conv2d(3, 16, kernel_size=8, stride=4, padding=0)  # (In Channel, Out Channel, ...)
         self.conv2 = nn.Conv2d(16, 32, kernel_size=4, stride=2, padding=0)
@@ -159,7 +159,7 @@ GAMMA = 0.999
 EPS_START = 0.9
 EPS_END = 0.05
 EPS_DECAY = 1000
-TARGET_UPDATE = 800
+TARGET_UPDATE = 700
 
 
 
@@ -173,7 +173,7 @@ target_net.load_state_dict(policy_net.state_dict())
 target_net.eval()
 
 optimizer = optim.RMSprop(policy_net.parameters(), lr = 5e-4 , weight_decay= 1e-5)
-memory = ReplayMemory(50000)
+memory = ReplayMemory(60000)
 
 
 steps_done = 0
@@ -193,7 +193,7 @@ def select_action(state):
             # found, so we pick action with the larger expected reward.
             return policy_net(state).max(1)[1].view(1, 1)
     else:
-        return torch.tensor([[random.randrange(3)]],device=device, dtype=torch.long)
+        return torch.tensor([[random.randrange(4)]],device=device, dtype=torch.long)
 
 
 episode_durations = []
@@ -280,10 +280,9 @@ for i_episode in range(num_episodes):
     # Initialize the environment and state
 
     env.reset()
-    env.step(1)    # fire ball at the begining of episode
+    # env.step(1)    # fire ball at the begining of episode
 
-    Total_lives = 5
-    lives_left = 5
+
     epi_reward = 0
 
     state = stackframes()
@@ -296,10 +295,8 @@ for i_episode in range(num_episodes):
     while True:
         # Select and perform an action
         action = select_action(state)
-        if action.item() == 1:
-            actionvalue = 3
-        else:
-            actionvalue = action.item()
+
+        actionvalue = action.item()
 
         for skip in range(frame_skip):
             obs, reward, done, info = env.step(actionvalue)
@@ -335,15 +332,11 @@ for i_episode in range(num_episodes):
         step_loss = optimize_model()
         if step_loss!= None:
             epiloss.append(step_loss)
-        if t % TARGET_UPDATE == 0:
+
+        if t>TARGET_UPDATE and t % TARGET_UPDATE <= 2:
             print("Target_Net Updated.....")
             target_net.load_state_dict(policy_net.state_dict())
-        for k, v in info.items():
-            current_lives = v
-        if lives_left - current_lives ==1:
-            lives_left= lives_left-1
-            env.render()
-            env.step(1)
+
         if done:
             episode_durations.append(epi_reward)
             plot_durations()
